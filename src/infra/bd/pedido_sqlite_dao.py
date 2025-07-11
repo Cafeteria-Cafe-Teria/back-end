@@ -50,10 +50,6 @@ class PedidoDAOSqlite(PedidoDAO, metaclass = SingletonMeta):
         }[type(adicional)]
 
     def __de_bebida(self, bebida : Bebida):
-
-        with open("log.txt", "w") as f:
-            f.write(bebida.__dict__.__str__())
-
         return {
             Cafe : 0,
             Cha : 1

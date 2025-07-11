@@ -69,7 +69,7 @@ class Pedido(ABC):
         return self.__itens
 
     @nome_cliente.setter
-    def definir_nome_cliente(self, valor : str):
+    def nome_cliente(self, valor : str):
         self.__nome_cliente = valor
 
     def adicionar(self, bebida : Bebida) -> int:
