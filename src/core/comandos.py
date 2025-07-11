@@ -16,7 +16,6 @@ class Comando(ABC, Generic[T]):
     def executar(self) -> T:
         pass
 
-
 class CriarPedidoComando(Comando[Pedido]):
 
     def __init__(self, pedido_dao : PedidoDAO):
@@ -51,11 +50,11 @@ class CancelarPedidoComando(Comando[str | None]):
         if remover_de_persistencia:
             self.___pedido_dao.remover(pedido)
         else:
+            pedido = pedido.para_cancelado()
             self.___pedido_dao.salvar(pedido)
+            pedido.notificar()
 
         return None
-            
-
 
 class AdicionarBebidaComando(Comando[str | Pedido.Item]):
     def __init__(self, pedido_dao : PedidoDAO, uuid : UUID, bebida : Bebida):
@@ -96,7 +95,7 @@ class RemoverBebidaComando(Comando[str | None]):
         self.___pedido_dao.salvar(pedido)
 
         return None
- 
+  
 class GerarNotaDePedidoComando(Comando[dict[str, Any] | str]):
     def __init__(self, pedido_dao : PedidoDAO, uuid : UUID):
         self.__uuid = uuid 
@@ -128,7 +127,6 @@ class DefinirNomeDoClienteComando(Comando [ str | None]):
         
         return None
 
-
 class DefinirNomeDoClienteComando(Comando [ str | None]):
     def __init__(self, pedido_dao : PedidoDAO, uuid : UUID, nome_cliente : str):
         self.__uuid = uuid
@@ -158,13 +156,10 @@ class EnviarPedidoComando(Comando[str | None]):
         if pedido is None:
             return f"Pedido {self.__uuid} não encontrado"
 
-
         try:
             pedido = pedido.para_recebido()        
         except Exception:
             return f"Impossivel passar {pedido.__class__.__name__} para status recebido"
-
-
 
         self.___pedido_dao.salvar(pedido)
 
@@ -186,7 +181,6 @@ class SimularNotaComPagamentoComando(Comando[dict[str, Any] | str]):
             return f"Pedido {self.__uuid} não encontrado"
         
         return self.__tipo_de_pagamento(pedido).gerar_nota()
-
    
 class PegarTodosOsPedidosComando(Comando[List[Pedido]]):
     def __init__(self, pedido_dao : PedidoDAO):

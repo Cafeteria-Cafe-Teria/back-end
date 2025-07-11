@@ -104,7 +104,7 @@ def endpoints_cliente() -> APIRouter:
         observer = ClienteObserver(websocket, uuid)
         ObserverHub().registrar(observer)
 
-        while True:
+        while websocket.state != WebSocketState.DISCONNECTED:
             await asyncio.sleep(1)
 
 
@@ -118,7 +118,6 @@ class CozinhaObserver(Observer):
     async def atualizar(self, data : Pedido):
         try:
             await self.__socket.send_text( json.dumps( PedidoDTO.de_pedido(data).para_dict() ) )
-            print("HERE")
         except WebSocketDisconnect:
             ObserverHub().remover(self)
 

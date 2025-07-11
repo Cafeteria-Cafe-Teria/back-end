@@ -45,7 +45,6 @@ class PedidoDTO(BaseModel):
 
     @classmethod
     def de_pedido(cls, pedido : Pedido) -> Self:        
-        # print(cls)
         bebidas = []
 
         for item in pedido.itens:
