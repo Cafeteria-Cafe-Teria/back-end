@@ -3,3 +3,4 @@ db.db
 venv
 .venv
 .env
+testes.py

@@ -9,7 +9,7 @@ class StatusDePedidoEnum(str, Enum):
     entregue = "Entregue"
     cancelado = "Cancelado"
     pronto = "Pronto"
-    em_preparo = "Em prepearo"
+    em_preparo = "Em preparo"
     recebido = "Recebido"
     em_realizacao = "Em realização"    
 
@@ -57,6 +57,6 @@ class PedidoDTO(BaseModel):
         return {
             'uuid' : self.uuid.__str__(),
             'nome_do_cliente' : self.nome_do_cliente,
-            'status' : str(self.status),
+            'status' : self.status.value,
             'bebidas' : [bebida.para_dict() for bebida in self.bebidas]
         }

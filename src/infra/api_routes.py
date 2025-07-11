@@ -24,7 +24,6 @@ class ClienteObserver(Observer):
             except WebSocketDisconnect:
                 ObserverHub().remover(self)
 
-
 def endpoints_cliente() -> APIRouter:
     router = APIRouter()
 
@@ -109,7 +108,6 @@ def endpoints_cliente() -> APIRouter:
 
 
     return router
-
 
 class CozinhaObserver(Observer):
     def __init__(self, socket : WebSocket):

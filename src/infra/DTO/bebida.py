@@ -60,6 +60,6 @@ class BebidaDTO(BaseModel):
     def para_dict(self) -> dict:
         return {
             'id' : self.id,
-            'tipo' : str(self.tipo),
-            'adicionais' : [str(adicional) for adicional in self.adicionais]
+            'tipo' : self.tipo.value,
+            'adicionais' : [adicional.value for adicional in self.adicionais]
         }
