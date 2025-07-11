@@ -1,0 +1,26 @@
+{
+    "setup": [
+        "PRAGMA foreign_keys=ON",
+        "CREATE TABLE IF NOT EXISTS pedido ( uuid TEXT PRIMARY KEY, nome_cliente TEXT, status INTEGER )",
+        "CREATE TABLE IF NOT EXISTS bebida ( uuid_pedido TEXT, uuid TEXT PRIMARY KEY, tipo INTEGER, numero_de_sequencia INTEGER, FOREIGN KEY(uuid_pedido) REFERENCES pedido(uuid)  ON DELETE CASCADE  )",
+        "CREATE TABLE IF NOT EXISTS adicional ( uuid_bebida TEXT, tipo INTEGER, FOREIGN KEY(uuid_bebida) REFERENCES bebida(uuid) ON DELETE CASCADE )"
+    ],
+    "select": {
+        "pedido" : "SELECT * FROM pedido",
+        "bebida" : "SELECT * FROM bebida",
+        "adicional" : "SELECT * FROM adicional",
+        "informacoes_de_pagamento" : "SELECT * FROM informacoes_de_pagamento"
+    },
+    "update" : {
+
+    },
+    "insert" : {
+        "pedido": "INSERT INTO pedido (uuid, nome_cliente, status) VALUES ",
+        "bebida": "INSERT INTO bebida (uuid_pedido, uuid, tipo, numero_de_sequencia) VALUES ",
+        "adicional": "INSERT INTO adicional (uuid_bebida, tipo) VALUES "
+    },
+    "delete" : {
+        "pedido" : "DELETE FROM pedido WHERE uuid="
+    }
+
+}
