@@ -96,7 +96,7 @@ def endpoints_cliente() -> APIRouter:
     # Socket cliente
     # Nesse socket o cliente vai enviar um uuid e vai somente se importar com alterações neste id
 
-    @router.websocket_route("/ws/{uuid}")
+    @router.websocket("/ws/{uuid}")
     async def cliente_socket(websocket : WebSocket, uuid : UUID):
         await websocket.accept()
 
@@ -141,7 +141,7 @@ def endpoints_cozinha() -> APIRouter:
 
 
 
-    @router.websocket_route("/ws")
+    @router.websocket("/ws")
     async def cozinha_socket(websocket : WebSocket):
         await websocket.accept()
 
