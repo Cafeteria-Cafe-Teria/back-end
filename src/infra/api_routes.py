@@ -5,7 +5,7 @@ from typing import Any, List
 from .DTO.bebida import BebidaDTO
 from .DTO.metodo_de_pagamento import MetodoDePagamentoEnum, MetodoDePagamentoDTO
 from .DTO.pedido import StatusDePedidoEnum, PedidoDTO
-from ..core.comandos import AdicionarBebidaComando, AtualizarBebidaComando, CancelarPedidoComando, CriarPedidoComando, DefinirNomeDoClienteComando, EnviarPedidoComando, GerarNotaDePedidoComando, MudarStatusDePagamentoComando, PegarTodosOsPedidosComando, RemoverBebidaComando, SimularNotaComPagamentoComando
+from ..core.comandos import AdicionarBebidaComando, CancelarPedidoComando,AtualizarBebidaComando, CriarPedidoComando, DefinirNomeDoClienteComando, EnviarPedidoComando, GerarNotaDePedidoComando, MudarStatusDePagamentoComando, PegarTodosOsPedidosComando, RemoverBebidaComando, SimularNotaComPagamentoComando
 from .bd.pedido_sqlite_dao import PedidoDAOSqlite
 from ..core.pedidos import Observer, Pedido, ObserverHub
 import asyncio
@@ -18,12 +18,11 @@ class ClienteObserver(Observer):
         self.__uuid = uuid
 
     async def atualizar(self, data:Pedido):
-        if self.__uuid.__str__() == data.uuid.__str__():
+        if self.__uuid == data.uuid:
             try:
                 await self.__socket.send_text( json.dumps( PedidoDTO.de_pedido(data).para_dict() ) )
             except WebSocketDisconnect:
                 ObserverHub().remover(self)
-
 
 def endpoints_cliente() -> APIRouter:
     router = APIRouter()
@@ -41,10 +40,9 @@ def endpoints_cliente() -> APIRouter:
         
         raise HTTPException(status_code=400, detail=log)
 
-    @router.put("/cliente/pedido/{uuid}/bebida/{id_bebida}")
-    def atualizar_bebida_em_pedido(uuid: UUID, id_bebida: int, bebida: BebidaDTO) -> BebidaDTO:
-    # Aqui você deve implementar a lógica para atualizar a bebida de id_bebida no pedido uuid
-        log_ou_item = AtualizarBebidaComando(PedidoDAOSqlite(), uuid, id_bebida, bebida.para_bebida()).executar()
+    @router.post("/cliente/pedido/{uuid}/bebida")
+    def adicionar_bebida_em_pedido( uuid : UUID, bebida : BebidaDTO) -> BebidaDTO:
+        log_ou_item = AdicionarBebidaComando(PedidoDAOSqlite(), uuid, bebida.para_bebida()).executar()
 
         if type(log_ou_item) == Pedido.Item:
             return BebidaDTO.de_item(log_ou_item)
@@ -59,6 +57,17 @@ def endpoints_cliente() -> APIRouter:
             return "Ok"
         
         raise HTTPException(status_code=400, detail=log)
+    
+    @router.delete("/cliente/pedido/{uuid}/bebida/{id_bebida}")
+    def atualizar_bebida_de_pedido( uuid : UUID, id_bebida : int ) -> str: 
+        log_ou_item = AtualizarBebidaComando(
+            PedidoDAOSqlite(), uuid, id_bebida, bebida.para_bebida()
+        ).executar()
+
+        if type(log_ou_item) == Pedido.Item:
+            return BebidaDTO.de_item(log_ou_item)
+        
+        raise HTTPException(status_code=400, detail=log_ou_item)
     
     @router.get("/cliente/pedido/{uuid}/nota/")
     def gerar_nota_de_pedido(uuid : UUID) -> dict[str, Any]:
@@ -76,15 +85,6 @@ def endpoints_cliente() -> APIRouter:
             return "Ok"
         
         raise HTTPException(status_code=400, detail=log)
-    
-    @router.put("/cliente/pedido/{uuid}/bebida")
-    def atualizar_bebida_em_pedido( uuid : UUID, bebida : BebidaDTO) -> BebidaDTO:
-        log_ou_item = AdicionarBebidaComando(PedidoDAOSqlite(), uuid, bebida.para_bebida()).executar()
-
-        if type(log_ou_item) == Pedido.Item:
-            return BebidaDTO.de_item(log_ou_item)
-        
-        raise HTTPException(status_code=400, detail=log_ou_item)
 
     @router.post("/cliente/pedido/{uuid}/")
     async def enviar_pedido(uuid : UUID) -> str:
@@ -109,12 +109,6 @@ def endpoints_cliente() -> APIRouter:
 
     @router.websocket("/ws/{uuid}")
     async def cliente_socket(websocket : WebSocket, uuid : UUID):
-        print(uuid)
-        print(websocket)
-        
-        with open("aa.txt", 'w') as f:
-            f.write("entered \n")
-
         await websocket.accept()
 
         observer = ClienteObserver(websocket, uuid)
@@ -165,7 +159,7 @@ def endpoints_cozinha() -> APIRouter:
         observer = CozinhaObserver(websocket)
         ObserverHub().registrar(observer)
 
-        while websocket.state not in [WebSocketState.DISCONNECTED]:
+        while websocket.state != [WebSocketState.DISCONNECTED]:
             await asyncio.sleep(1)
 
 
