@@ -18,11 +18,12 @@ class ClienteObserver(Observer):
         self.__uuid = uuid
 
     async def atualizar(self, data:Pedido):
-        if self.__uuid == data.uuid:
+        if self.__uuid.__str__() == data.uuid.__str__():
             try:
                 await self.__socket.send_text( json.dumps( PedidoDTO.de_pedido(data).para_dict() ) )
             except WebSocketDisconnect:
                 ObserverHub().remover(self)
+
 
 def endpoints_cliente() -> APIRouter:
     router = APIRouter()
@@ -98,6 +99,12 @@ def endpoints_cliente() -> APIRouter:
 
     @router.websocket("/ws/{uuid}")
     async def cliente_socket(websocket : WebSocket, uuid : UUID):
+        print(uuid)
+        print(websocket)
+        
+        with open("aa.txt", 'w') as f:
+            f.write("entered \n")
+
         await websocket.accept()
 
         observer = ClienteObserver(websocket, uuid)
@@ -148,7 +155,7 @@ def endpoints_cozinha() -> APIRouter:
         observer = CozinhaObserver(websocket)
         ObserverHub().registrar(observer)
 
-        while websocket.state != [WebSocketState.DISCONNECTED]:
+        while websocket.state not in [WebSocketState.DISCONNECTED]:
             await asyncio.sleep(1)
 
 
