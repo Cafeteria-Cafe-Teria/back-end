@@ -5,7 +5,7 @@ from typing import Any, List
 from .DTO.bebida import BebidaDTO
 from .DTO.metodo_de_pagamento import MetodoDePagamentoEnum, MetodoDePagamentoDTO
 from .DTO.pedido import StatusDePedidoEnum, PedidoDTO
-from ..core.comandos import AdicionarBebidaComando, CancelarPedidoComando, CriarPedidoComando, DefinirNomeDoClienteComando, EnviarPedidoComando, GerarNotaDePedidoComando, MudarStatusDePagamentoComando, PegarTodosOsPedidosComando, RemoverBebidaComando, SimularNotaComPagamentoComando
+from ..core.comandos import AdicionarBebidaComando, AtualizarBebidaComando, CancelarPedidoComando, CriarPedidoComando, DefinirNomeDoClienteComando, EnviarPedidoComando, GerarNotaDePedidoComando, MudarStatusDePagamentoComando, PegarTodosOsPedidosComando, RemoverBebidaComando, SimularNotaComPagamentoComando
 from .bd.pedido_sqlite_dao import PedidoDAOSqlite
 from ..core.pedidos import Observer, Pedido, ObserverHub
 import asyncio
@@ -41,9 +41,10 @@ def endpoints_cliente() -> APIRouter:
         
         raise HTTPException(status_code=400, detail=log)
 
-    @router.post("/cliente/pedido/{uuid}/bebida")
-    def adicionar_bebida_em_pedido( uuid : UUID, bebida : BebidaDTO) -> BebidaDTO:
-        log_ou_item = AdicionarBebidaComando(PedidoDAOSqlite(), uuid, bebida.para_bebida()).executar()
+    @router.put("/cliente/pedido/{uuid}/bebida/{id_bebida}")
+    def atualizar_bebida_em_pedido(uuid: UUID, id_bebida: int, bebida: BebidaDTO) -> BebidaDTO:
+    # Aqui você deve implementar a lógica para atualizar a bebida de id_bebida no pedido uuid
+        log_ou_item = AtualizarBebidaComando(PedidoDAOSqlite(), uuid, id_bebida, bebida.para_bebida()).executar()
 
         if type(log_ou_item) == Pedido.Item:
             return BebidaDTO.de_item(log_ou_item)
@@ -75,6 +76,15 @@ def endpoints_cliente() -> APIRouter:
             return "Ok"
         
         raise HTTPException(status_code=400, detail=log)
+    
+    @router.put("/cliente/pedido/{uuid}/bebida")
+    def atualizar_bebida_em_pedido( uuid : UUID, bebida : BebidaDTO) -> BebidaDTO:
+        log_ou_item = AdicionarBebidaComando(PedidoDAOSqlite(), uuid, bebida.para_bebida()).executar()
+
+        if type(log_ou_item) == Pedido.Item:
+            return BebidaDTO.de_item(log_ou_item)
+        
+        raise HTTPException(status_code=400, detail=log_ou_item)
 
     @router.post("/cliente/pedido/{uuid}/")
     async def enviar_pedido(uuid : UUID) -> str:

@@ -95,6 +95,33 @@ class RemoverBebidaComando(Comando[str | None]):
         self.___pedido_dao.salvar(pedido)
 
         return None
+    
+class AtualizarBebidaComando(Comando[str | Pedido.Item]):
+    def __init__(self, pedido_dao: PedidoDAO, uuid: UUID, id_bebida: int, nova_bebida: Bebida):
+        self.__uuid = uuid
+        self.___pedido_dao = pedido_dao
+        self.__id_bebida = id_bebida
+        self.__nova_bebida = nova_bebida
+
+    def executar(self) -> str | Pedido.Item:
+        pedido = self.___pedido_dao.pegar(self.__uuid)
+
+        if pedido is None:
+            return f"Pedido {self.__uuid} não encontrado"
+
+        # Procura o item pelo id_bebida
+        item = next((item for item in pedido.itens if item.id == self.__id_bebida), None)
+        if item is None:
+            return f"Bebida {self.__id_bebida} não encontrada no pedido {self.__uuid}"
+
+        try:
+            # Atualiza os dados da bebida
+            item.bebida = self.__nova_bebida
+        except Exception:
+            return f"Impossível atualizar bebida em pedido de status {pedido.__class__.__name__}"
+
+        self.___pedido_dao.salvar(pedido)
+        return item
   
 class GerarNotaDePedidoComando(Comando[dict[str, Any] | str]):
     def __init__(self, pedido_dao : PedidoDAO, uuid : UUID):
