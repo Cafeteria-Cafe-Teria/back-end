@@ -5,7 +5,7 @@ from typing import Any, List
 from .DTO.bebida import BebidaDTO
 from .DTO.metodo_de_pagamento import MetodoDePagamentoEnum, MetodoDePagamentoDTO
 from .DTO.pedido import StatusDePedidoEnum, PedidoDTO
-from ..core.comandos import AdicionarBebidaComando, CancelarPedidoComando,AtualizarBebidaComando, CriarPedidoComando, DefinirNomeDoClienteComando, EnviarPedidoComando, GerarNotaDePedidoComando, MudarStatusDePagamentoComando, PegarTodosOsPedidosComando, RemoverBebidaComando, SimularNotaComPagamentoComando
+from ..core.comandos import AdicionarBebidaComando, CancelarPedidoComando, CriarPedidoComando, DefinirNomeDoClienteComando, EnviarPedidoComando, GerarNotaDePedidoComando, MudarStatusDePagamentoComando, PegarTodosOsPedidosComando, RemoverBebidaComando, SimularNotaComPagamentoComando
 from .bd.pedido_sqlite_dao import PedidoDAOSqlite
 from ..core.pedidos import Observer, Pedido, ObserverHub
 import asyncio
@@ -57,17 +57,6 @@ def endpoints_cliente() -> APIRouter:
             return "Ok"
         
         raise HTTPException(status_code=400, detail=log)
-    
-    @router.delete("/cliente/pedido/{uuid}/bebida/{id_bebida}")
-    def atualizar_bebida_de_pedido( uuid : UUID, id_bebida : int ) -> str: 
-        log_ou_item = AtualizarBebidaComando(
-            PedidoDAOSqlite(), uuid, id_bebida, bebida.para_bebida()
-        ).executar()
-
-        if type(log_ou_item) == Pedido.Item:
-            return BebidaDTO.de_item(log_ou_item)
-        
-        raise HTTPException(status_code=400, detail=log_ou_item)
     
     @router.get("/cliente/pedido/{uuid}/nota/")
     def gerar_nota_de_pedido(uuid : UUID) -> dict[str, Any]:
