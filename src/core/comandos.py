@@ -127,24 +127,6 @@ class DefinirNomeDoClienteComando(Comando [ str | None]):
         
         return None
 
-class DefinirNomeDoClienteComando(Comando [ str | None]):
-    def __init__(self, pedido_dao : PedidoDAO, uuid : UUID, nome_cliente : str):
-        self.__uuid = uuid
-        self.___pedido_dao = pedido_dao
-        self.___nome = nome_cliente
-
-    def executar(self) -> str | None:
-        pedido = self.___pedido_dao.pegar(self.__uuid)
-
-        if pedido is None:
-            return f"Pedido {self.__uuid} não encontrado"
-
-        pedido.nome_cliente = self.___nome
-
-        self.___pedido_dao.salvar(pedido)
-        
-        return None
-
 class EnviarPedidoComando(Comando[str | None]):
     def __init__(self, pedido_dao : PedidoDAO, uuid : UUID):
         self.__uuid = uuid
